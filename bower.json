@@ -1,0 +1,34 @@
+{
+  "name": "purescript-bucketchain-csrf",
+  "license": "MIT",
+  "homepage": "https://github.com/Bucketchain/purescript-bucketchain-csrf",
+  "authors": [
+    "Shinya Takahashi <s.takahashi313@gmail.com>"
+  ],
+  "description": "A Bucketchain middleware for stateless CSRF protection without token.",
+  "keywords": [
+    "purescript",
+    "webserver",
+    "csrf"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Bucketchain/purescript-bucketchain-csrf.git"
+  },
+  "moduleType": [
+    "node"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "output"
+  ],
+  "dependencies": {
+    "purescript-bucketchain": "^0.3.0"
+  },
+  "devDependencies": {
+    "purescript-assert": "^4.0.0",
+    "purescript-bucketchain-cors": "^0.2.0"
+  }
+}

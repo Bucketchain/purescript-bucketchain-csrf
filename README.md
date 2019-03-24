@@ -6,8 +6,16 @@ A [Bucketchain](https://github.com/Bucketchain/purescript-bucketchain) middlewar
 
 ## Installation
 
+### Bower
+
 ```
-bower install purescript-bucketchain-csrf purescript-bucketchain-cors
+$ bower install purescript-bucketchain-csrf purescript-bucketchain-cors
+```
+
+### Spago
+
+```
+$ spago install bucketchain-csrf bucketchain-cors
 ```
 
 ## Usage

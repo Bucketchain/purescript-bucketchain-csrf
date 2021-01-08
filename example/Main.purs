@@ -3,7 +3,6 @@ module Main where
 import Prelude
 
 import Bucketchain (createServer, listen)
-import Bucketchain.CORS (withCORS, defaultOptions)
 import Bucketchain.CSRF (withCSRFProtection)
 import Bucketchain.Http (requestMethod, requestURL)
 import Bucketchain.Middleware (Middleware)
@@ -18,7 +17,7 @@ main :: Effect Unit
 main = server >>= listen opts
 
 server :: Effect Server
-server = createServer $ middleware1 <<< middleware2 <<< middleware3
+server = createServer $ middleware1 <<< middleware2
 
 opts :: ListenOptions
 opts =
@@ -30,15 +29,16 @@ opts =
 middleware1 :: Middleware
 middleware1 = withCSRFProtection
   { host: "localhost:3000"
-  , origins: [ "http://localhost:3000", "http://localhost:3001" ]
+  , origins: [ "http://localhost:3000" ]
   }
 
 middleware2 :: Middleware
-middleware2 = withCORS defaultOptions
-
-middleware3 :: Middleware
-middleware3 next = do
+middleware2 next = do
   http <- ask
-  if requestMethod http == "POST" && requestURL http == "/test"
-    then liftEffect $ Just <$> body "This is test."
-    else next
+  case requestMethod http, requestURL http of
+    "POST", "/test" ->
+      liftEffect $ Just <$> body "This is test."
+    "GET", "/" ->
+      liftEffect $ Just <$> body "html"
+    _, _ ->
+      next

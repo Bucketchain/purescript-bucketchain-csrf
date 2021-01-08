@@ -24,6 +24,7 @@ main = do
   listen s opts $ runAff_ (handleAff s) do
     testWrongHost
     testWithoutXFrom
+    testWrongXFrom
     testUnpermittedOrigin
     testCorrectRequest
   where
@@ -49,9 +50,9 @@ testWrongHost = do
         <> C.path := "/test"
         <> C.headers := headers
     headers = C.RequestHeaders $ fromFoldable
-      [ Tuple "Host" "localhost:3002"
-      , Tuple "Origin" "http://localhost:3001"
-      , Tuple "X-From" "http://localhost:3001"
+      [ Tuple "Host" "localhost:3001"
+      , Tuple "Origin" "http://localhost:3000"
+      , Tuple "X-From" "http://localhost:3000"
       ]
 
 testWithoutXFrom :: Aff Unit
@@ -65,7 +66,22 @@ testWithoutXFrom = do
         <> C.headers := headers
     headers = C.RequestHeaders $ fromFoldable
       [ Tuple "Host" "localhost:3000"
-      , Tuple "Origin" "http://localhost:3001"
+      , Tuple "Origin" "http://localhost:3000"
+      ]
+
+testWrongXFrom :: Aff Unit
+testWrongXFrom = do
+  res <- request opts
+  liftEffect $ assert $ C.statusCode res == 403
+  where
+    opts = C.port := 3000
+        <> C.method := "POST"
+        <> C.path := "/test"
+        <> C.headers := headers
+    headers = C.RequestHeaders $ fromFoldable
+      [ Tuple "Host" "localhost:3000"
+      , Tuple "Origin" "http://localhost:3000"
+      , Tuple "X-From" "http://localhost:3001"
       ]
 
 testUnpermittedOrigin :: Aff Unit
@@ -79,8 +95,8 @@ testUnpermittedOrigin = do
         <> C.headers := headers
     headers = C.RequestHeaders $ fromFoldable
       [ Tuple "Host" "localhost:3000"
-      , Tuple "Origin" "http://localhost:3002"
-      , Tuple "X-From" "http://localhost:3001"
+      , Tuple "Origin" "http://localhost:3001"
+      , Tuple "X-From" "http://localhost:3000"
       ]
 
 testCorrectRequest :: Aff Unit
@@ -94,6 +110,6 @@ testCorrectRequest = do
         <> C.headers := headers
     headers = C.RequestHeaders $ fromFoldable
       [ Tuple "Host" "localhost:3000"
-      , Tuple "Origin" "http://localhost:3001"
-      , Tuple "X-From" "http://localhost:3001"
+      , Tuple "Origin" "http://localhost:3000"
+      , Tuple "X-From" "http://localhost:3000"
       ]

@@ -28,33 +28,34 @@ type Options =
 withCSRFProtection :: Options -> Middleware
 withCSRFProtection opts next = do
   http <- ask
-  if requestMethod http == "OPTIONS" || isCorrectRequest http opts
+  if isIgnoredMethods http || isCorrectRequest http opts
     then next
     else liftEffect do
       setHeader http "Content-Type" "text/plain; charset=utf-8"
       setStatusCode http 403
       Just <$> body "Forbidden."
 
+isIgnoredMethods :: Http -> Boolean
+isIgnoredMethods http =
+  elem (requestMethod http) [ "GET", "HEAD", "OPTIONS" ]
+
 isCorrectRequest :: Http -> Options -> Boolean
 isCorrectRequest http opts =
-  isCorrectHost http opts.host
-    && isCorrectXFrom http opts.origins
-    && isCorrectOrigin http opts.origins
+  isCorrectHost http opts && isCorrectOrigin http opts
 
-isCorrectHost :: Http -> String -> Boolean
-isCorrectHost http host = host' == Just host
+isCorrectHost :: Http -> Options -> Boolean
+isCorrectHost http { host } =
+  host' == Just host
   where
     headers = requestHeaders http
     host' = lookup "host" headers <|> lookup ":authority" headers
 
-isCorrectXFrom :: Http -> Array String -> Boolean
-isCorrectXFrom http origins =
-  case lookup "x-from" $ requestHeaders http of
-    Nothing -> false
-    Just xFrom -> elem xFrom origins
-
-isCorrectOrigin :: Http -> Array String -> Boolean
-isCorrectOrigin http origins =
-  case lookup "origin" $ requestHeaders http of
-    Nothing -> true
-    Just origin -> elem origin origins
+isCorrectOrigin :: Http -> Options -> Boolean
+isCorrectOrigin http { origins } =
+  case lookup "x-from" headers, lookup "origin" headers of
+    Just xFrom, Just origin ->
+      xFrom == origin && elem origin origins
+    Just _, Nothing -> true
+    Nothing, _ -> false
+  where
+    headers = requestHeaders http

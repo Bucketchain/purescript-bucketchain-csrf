@@ -28,7 +28,6 @@
     "purescript-bucketchain": "^0.3.0"
   },
   "devDependencies": {
-    "purescript-assert": "^4.0.0",
-    "purescript-bucketchain-cors": "^0.2.0"
+    "purescript-assert": "^4.0.0"
   }
 }

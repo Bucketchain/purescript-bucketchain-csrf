@@ -9,46 +9,43 @@ A [Bucketchain](https://github.com/Bucketchain/purescript-bucketchain) middlewar
 ### Bower
 
 ```
-$ bower install purescript-bucketchain-csrf purescript-bucketchain-cors
+$ bower install purescript-bucketchain-csrf
 ```
 
 ### Spago
 
 ```
-$ spago install bucketchain-csrf bucketchain-cors
+$ spago install bucketchain-csrf
 ```
 
 ## Usage
 
-Use with cors middleware.
-
 ```purescript
 server :: Effect Server
-server = createServer $ middleware1 <<< middleware2 <<< middleware3
+server = createServer $ middleware1 <<< middleware2
 
 middleware1 :: Middleware
 middleware1 = withCSRFProtection
   { host: "example.oreshinya.xyz"
-  , origins: [ "http://example.oreshinya.xyz", "http://test.oreshinya.xyz" ]
+  , origins: [ "http://example.oreshinya.xyz" ]
   }
 
 middleware2 :: Middleware
-middleware2 = withCORS defaultOptions
-  { origins = Origins [ "http://example.oreshinya.xyz", "http://test.oreshinya.xyz" ]
-  }
-
-middleware3 :: Middleware
-middleware3 next = do
+middleware2 next = do
   http <- ask
-  if requestMethod http == "POST" && requestURL http == "/test"
-    then liftEffect $ Just <$> body "This is test."
-    else next
+  case requestMethod http, requestURL http of
+    "POST", "/test" ->
+      liftEffect $ Just <$> body "This is test."
+    "GET", "/" ->
+      liftEffect $ Just <$> body "This is text."
+    _, _ ->
+      next
 ```
 
-This middleware checks some headers:
-- `Host`: Check if host(for DNS Rebinding).
-- `X-From`: Check if allowed origin. you should send all request with this header.
-- `Origin`: Check if allowed origin.
+This middleware needs 3 headers:
+- `Host`: Browsers send it automatically.
+- `X-From`: You should send all request with this header.
+- `Origin`: Browsers send it automatically.
 
 ## Documentation
 
